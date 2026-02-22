@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 051208504980.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI_BACKEND=051208504980.dkr.ecr.us-east-1.amazonaws.com/todo-backend
+      - REPOSITORY_URI_FRONTEND=051208504980.dkr.ecr.us-east-1.amazonaws.com/todo-frontend
+      - IMAGE_TAG=latest
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building backend Docker image...
+      - docker build -t $REPOSITORY_URI_BACKEND:$IMAGE_TAG ./backend
+      - echo Building frontend Docker image...
+      - docker build -t $REPOSITORY_URI_FRONTEND:$IMAGE_TAG ./frontend
+
+  post_build:
+    commands:
+      - echo Pushing images to ECR...
+      - docker push $REPOSITORY_URI_BACKEND:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
+      - echo Build completed on `date`
